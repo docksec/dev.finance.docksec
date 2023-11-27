@@ -6,6 +6,3 @@ WORKDIR /usr/src/app
 
 # Copie o conteúdo do diretório da sua aplicação para o contêiner
 COPY . .
-
-# Instale as dependências
-RUN npm install
