@@ -9,6 +9,3 @@ COPY . .
 
 # Instale as dependências
 RUN npm install
-
-# Exponha a porta 8080 (ou a porta que o Live Server está usando)
-EXPOSE 8080
