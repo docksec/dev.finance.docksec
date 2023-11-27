@@ -12,7 +12,3 @@ RUN npm install
 
 # Exponha a porta 8080 (ou a porta que o Live Server está usando)
 EXPOSE 8080
-
-# Comando para iniciar o Live Server
-CMD ["npx", "live-server"]
-
