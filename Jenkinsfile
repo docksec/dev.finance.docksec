@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     // Construir a imagem Docker
-                    docker.build("docksec6/docksec:${env.BUILD_ID}", "-f ./Dockerfile")
+                    docker.build("docksec6/docksec:${env.BUILD_ID}", "-f ./Dockerfile ./")
                 }
             }
         }
