@@ -31,6 +31,7 @@ pipeline {
 
             // Construir e executar o container na porta 80
                 docker.image("docksec6/docksec:12").run("-p", "80:8080")
+                }
             }
         }
     }
