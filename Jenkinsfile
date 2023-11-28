@@ -30,7 +30,7 @@ pipeline {
                     sh "docker pull docksec6/docksec:12"
                     sh "docker run -d -p 80:8080 docksec6/docksec:12"
                     sh "EXPOSE 8080"
-                    sh "npx live-server                    
+                    sh "npx live-server"                   
                 }
             }
         }
