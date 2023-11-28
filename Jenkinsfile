@@ -5,7 +5,6 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh 'npm install'
                     docker.build("docksec6/docksec:${env.BUILD_ID}", "-f ./Dockerfile .")
                 }
             }
@@ -25,14 +24,13 @@ pipeline {
             steps {
                 script {
                     withAWS(credentials: 'awsdocksec', region: 'sa-east-1') {
-                        sh "docker pull docksec6/docksec:${env.BUILD_ID}"
-                        sh "docker run -d -p 80:8080 docksec6/docksec:${env.BUILD_ID}"
-                        // A exposição de portas através do Dockerfile e 'EXPOSE' geralmente não é necessária aqui.
-                        sh "npx live-server"
+                        sh "trivy image docksec6/docksec:v1 > scan.txt"
                     }
                 }
             }
         }
+    }
+}
     }
 }
 
