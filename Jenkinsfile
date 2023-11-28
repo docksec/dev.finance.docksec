@@ -5,7 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    run npm install"
+                    run npm install
                     // Construir a imagem Docker
                     docker.build("docksec6/docksec:${env.BUILD_ID}", "-f ./Dockerfile .")
                 }
