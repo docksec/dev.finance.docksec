@@ -24,14 +24,13 @@ pipeline {
         }
         stage('Deploy no ambiente de Dev na AWS'){
             steps{
-            // Configurar credenciais AWS
+             // Configurar credenciais AWS
             withAWS(credentials: 'awsdocksec', region: 'sa-east-1') {
-                // Baixar container do Docker Hub com a tag '12'
+            // Baixar container do Docker Hub com a tag '12'
                 docker.image("docksec6/docksec:12").pull()
 
-                // Construir e executar o container na porta 80
-                docker.image("docksec6/docksec:12").run("-p", "80:8080", "-d")   
-                }
+            // Construir e executar o container na porta 80
+                docker.image("docksec6/docksec:12").run("-p", "80:8080")
             }
         }
     }
