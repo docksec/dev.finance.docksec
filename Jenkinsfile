@@ -15,7 +15,7 @@ pipeline{
         }
         stage('Checkout from Git'){
             steps{
-                git branch: 'master', url: 'https://github.com/docksec/dev.finance.docksec'
+                git branch: 'master', url: 'https://github.com/docksec/dev.finance.docksec.git'
             }
         }
         stage("Sonarqube Analysis "){
