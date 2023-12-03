@@ -1,41 +1,53 @@
-pipeline {
-    agent {
-        label 'vmdocksecdev'
+pipeline{
+    agent any
+    tools{
+        jdk 'jdk17'
+        nodejs 'node16'
     }
-    
+    environment {
+        SCANNER_HOME=tool 'sonar-scanner'
+    }
     stages {
-        stage('Build') {
-            steps {
-                script {
-                    // Construir a imagem Docker
-                    docker.build("docksec6/docksec:${env.BUILD_ID}", "-f ./Dockerfile .")
+        stage('clean workspace'){
+            steps{
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git'){
+            steps{
+                git branch: 'master', url: 'https://github.com/docksec/dev.finance.docksec'
+            }
+        }
+        stage("Sonarqube Analysis "){
+            steps{
+                withSonarQubeEnv('sonar-server') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Netflix \
+                    -Dsonar.projectKey=Netflix '''
                 }
             }
         }
-        
-        stage('Push to Docker Hub') {
-            steps {
+        stage("quality gate"){
+           steps {
                 script {
-                    // Autenticar no Docker Hub
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                        // Empurrar a imagem para o Docker Hub
-                        docker.image("docksec6/docksec:${env.BUILD_ID}").push()
-                    }
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
                 }
+            } 
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
             }
         }
-        
-        stage('Deploy no ambiente de Dev na AWS') {
-            steps {
-                script {
-                    // Configurar credenciais AWS
-                    withAWS(credentials: 'awsdocksec', region: 'sa-east-1') {
-                        // Executar comandos Docker no nó vmdocksecdev
-                        sh "docker pull docksec6/docksec:${env.BUILD_ID}"
-                        sh "docker run -d -p 80:8080 docksec6/docksec:${env.BUILD_ID}"
-                    }
-                }
-            }
+    }
+    post {
+     always {
+        emailext attachLog: true,
+            subject: "'${currentBuild.result}'",
+            body: "Project: ${env.JOB_NAME}<br/>" +
+                "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                "URL: ${env.BUILD_URL}<br/>",
+            to: 'docksec6@gmail.com',
+            attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
         }
     }
 }
