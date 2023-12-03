@@ -38,6 +38,17 @@ pipeline{
                 sh "npm install"
             }
         }
+        stage('OWASP FS SCAN') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        stage('TRIVY FS SCAN') {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+            }
+        }
     }
     post {
      always {
@@ -50,7 +61,7 @@ pipeline{
             attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
         }
     }
-}
+    }
 
 
 
