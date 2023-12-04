@@ -57,7 +57,7 @@ pipeline{
         }
         stage("TRIVY"){
             steps{
-                sh "trivy image sevenajay/netflix:latest > trivyimage.txt" 
+                sh "trivy image docksec6/docksec:latest > trivyimage.txt" 
             }
         }
     }
