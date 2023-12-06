@@ -73,7 +73,7 @@ pipeline {
 
             steps {
                 script {
-                    withAWS(credentials: 'ubuntu', region: 'sa-east-1') {
+                    withAWS(credentials: 'AWS', region: 'sa-east-1') {
                         sh 'docker pull docksec6/docksec:latest'
                         sh 'docker build -t docksec:latest .'
                         sh 'docker run -d --name docksec-latest -p 8080:8080 docksec6/docksec:latest'
