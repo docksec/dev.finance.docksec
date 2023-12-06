@@ -1,5 +1,8 @@
 pipeline {
-    agent any
+    agent{
+        label 'agentLocal'
+        label 'agentAWS'
+    }
 
     tools {
         jdk 'jdk17'
