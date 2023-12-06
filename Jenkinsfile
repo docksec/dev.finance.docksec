@@ -30,17 +30,11 @@ pipeline {
                         -Dsonar.projectName=Dev.finance \
                         -Dsonar.projectKey=Dev.finance"""
                 }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
                 script {
                     waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
             }
         }
-
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
