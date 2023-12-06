@@ -12,18 +12,27 @@ pipeline {
 
     stages {
         stage('Clean Workspace') {
+            agent {
+                label 'agentLocal'
+            }
             steps {
                 cleanWs()
             }
         }
 
         stage('Checkout from Git') {
+            agent {
+                label 'agentLocal'
+            }
             steps {
                 git branch: 'master', url: 'https://github.com/docksec/dev.finance.docksec.git'
             }
         }
 
         stage('Sonarqube (SAST)') {
+            agent {
+                label 'agentLocal'
+            }
             steps {
                 withSonarQubeEnv('sonar-server') {
                     sh """$SCANNER_HOME/bin/sonar-scanner \
@@ -35,13 +44,20 @@ pipeline {
                 }
             }
         }
+
         stage('Install Dependencies') {
+            agent {
+                label 'agentLocal'
+            }
             steps {
                 sh 'npm install'
             }
         }
 
         stage('Dependency Check (SCA)') {
+            agent {
+                label 'agentLocal'
+            }
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
@@ -49,6 +65,9 @@ pipeline {
         }
 
         stage('Docker Build & Push') {
+            agent {
+                label 'agentLocal'
+            }
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
@@ -61,12 +80,18 @@ pipeline {
         }
 
         stage('Container Scan') {
+            agent {
+                label 'agentLocal'
+            }
             steps {
                 sh 'trivy image docksec6/docksec:latest > trivyimage.txt'
             }
         }
 
         stage('Deploy em Homologação') {
+            agent {
+                label 'agentAWS'
+            }
             environment {
                 tag_version = "latest"
             }
