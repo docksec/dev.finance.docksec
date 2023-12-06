@@ -1,78 +1,105 @@
-pipeline{
+pipeline {
     agent any
-    tools{
+
+    tools {
         jdk 'jdk17'
         nodejs 'node16'
     }
+
     environment {
-        SCANNER_HOME=tool 'sonar-scanner'
+        SCANNER_HOME = tool 'sonar-scanner'
     }
+
     stages {
-        stage('clean workspace'){
-            steps{
+        stage('Clean Workspace') {
+            steps {
                 cleanWs()
             }
         }
-        stage('Checkout from Git'){
-            steps{
+
+        stage('Checkout from Git') {
+            steps {
                 git branch: 'master', url: 'https://github.com/docksec/dev.finance.docksec.git'
             }
         }
-        stage("Sonarqube Analysis "){
-            steps{
+
+        stage('Sonarqube (SAST)') {
+            steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Dev.finance \
-                    -Dsonar.projectKey=Dev.finance '''
+                    sh """$SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectName=Dev.finance \
+                        -Dsonar.projectKey=Dev.finance"""
                 }
             }
         }
-        stage("quality gate"){
-           steps {
+
+        stage('Quality Gate') {
+            steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
-            } 
+            }
         }
+
         stage('Install Dependencies') {
             steps {
-                sh "npm install"
+                sh 'npm install'
             }
         }
-        stage('OWASP FS SCAN') {
+
+        stage('Dependency Check (SCA)') {
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
-        stage("Docker Build & Push"){
-            steps{
-                script{
-                   withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){   
-                       sh "docker build -t docksec:latest ."
-                       sh "docker tag docksec:latest docksec6/docksec:latest "
-                       sh "docker push docksec6/docksec:latest "
+
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh 'docker build -t docksec:latest .'
+                        sh 'docker tag docksec:latest docksec6/docksec:latest'
+                        sh 'docker push docksec6/docksec:latest'
                     }
                 }
             }
         }
-        stage("TRIVY"){
-            steps{
-                sh "trivy image docksec6/docksec:latest > trivyimage.txt" 
+
+        stage('Container Scan') {
+            steps {
+                sh 'trivy image docksec6/docksec:latest > trivyimage.txt'
+            }
+        }
+
+        stage('Deploy em Homologação') {
+            environment {
+                tag_version = "latest"
+            }
+
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh 'docker pull docksec6/docksec:latest'
+                        sh 'docker build -t docksec:latest .'
+                    }
+                    withAWS(credentials: 'Jenkins', region: 'sa-east-1') {
+                        sh 'docker run -d --name docksec-latest -p 8080:8080 docksec6/docksec:latest'
+                    }
+                }
             }
         }
     }
+
     post {
-     always {
-        emailext attachLog: true,
-            subject: "'${currentBuild.result}'",
-            body: "Project: ${env.JOB_NAME}<br/>" +
-                "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                "URL: ${env.BUILD_URL}<br/>",
-            to: 'docksec6@gmail.com',
-            attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+        always {
+            emailext attachLog: true,
+                subject: "'${currentBuild.result}'",
+                body: "Project: ${env.JOB_NAME}<br/>" +
+                    "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                    "URL: ${env.BUILD_URL}<br/>",
+                to: 'docksec6@gmail.com',
+                attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
         }
     }
-    }
-
-
-
+}
