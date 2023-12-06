@@ -1,7 +1,6 @@
 pipeline {
     agent{
         label 'agentLocal'
-        label 'agentAWS'
     }
 
     tools {
