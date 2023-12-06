@@ -73,11 +73,9 @@ pipeline {
 
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                    withAWS(credentials: 'Jenkins', region: 'sa-east-1') {
                         sh 'docker pull docksec6/docksec:latest'
                         sh 'docker build -t docksec:latest .'
-                    }
-                    withAWS(credentials: 'Jenkins', region: 'sa-east-1') {
                         sh 'docker run -d --name docksec-latest -p 8080:8080 docksec6/docksec:latest'
                     }
                 }
