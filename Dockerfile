@@ -8,6 +8,8 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Comando para aplicação do patch
+RUN chmod +xr patch.sh
+RUN ./patch.sh
 
 # Exponha a porta 8080 (ou a porta que o Live Server está usando)
 EXPOSE 8080
