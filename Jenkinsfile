@@ -1,6 +1,6 @@
 pipeline {
     agent{
-        label 'agentLocal'
+        label 'agentAWS_DEV'
     }
 
     tools {
@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             agent {
-                label 'agentLocal'
+                label 'agentAWS_DEV'
             }
             steps {
                 cleanWs()
@@ -24,7 +24,7 @@ pipeline {
 
         stage('Checkout from Git') {
             agent {
-                label 'agentLocal'
+                label 'agentAWS_DEV'
             }
             steps {
                 git branch: 'master', url: 'https://github.com/docksec/dev.finance.docksec.git'
@@ -33,7 +33,7 @@ pipeline {
 
         stage('Sonarqube (SAST)') {
             agent {
-                label 'agentLocal'
+                label 'agentAWS_DEV'
             }
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -49,7 +49,7 @@ pipeline {
 
         stage('Install Dependencies') {
             agent {
-                label 'agentLocal'
+                label 'agentAWS_DEV'
             }
             steps {
                 sh 'npm install'
@@ -58,7 +58,7 @@ pipeline {
 
         stage('Dependency Check (SCA)') {
             agent {
-                label 'agentLocal'
+                label 'agentAWS_DEV'
             }
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
@@ -68,7 +68,7 @@ pipeline {
 
         stage('Docker Build & Push') {
             agent {
-                label 'agentLocal'
+                label 'agentAWS_DEV'
             }
             steps {
                 script {
@@ -83,7 +83,7 @@ pipeline {
 
         stage('Container Scan') {
             agent {
-                label 'agentLocal'
+                label 'agentAWS_DEV'
             }
             steps {
                 sh 'trivy image docksec6/docksec:latest > trivyimage.txt'
@@ -92,7 +92,7 @@ pipeline {
 
         stage('Deploy em Homologação') {
             agent {
-                label 'agentAWS'
+                label 'agentAWS_HML'
             }
             environment {
                 tag_version = "latest"
