@@ -33,7 +33,7 @@ pipeline {
 
         stage('Sonarqube (SAST)') {
             agent {
-                label 'agentAWS_DEV'
+                label 'agentLocal'
             }
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -58,7 +58,7 @@ pipeline {
 
         stage('Dependency Check (SCA)') {
             agent {
-                label 'agentAWS_DEV'
+                label 'agentLocal'
             }
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
