@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: docksec_pod
+spec:
+  containers:
+    -name: docksec
+    image: docksec6/docksec:v1
