@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Service
+Metadata:
+  name: svc-docsec-pod
+spec:
+  type: ClusterIP
+  selector:
+    app: portainer-pod
