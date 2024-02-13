@@ -10,7 +10,8 @@ chmod +x get_helm.sh
 ./get_helm.sh
 
 # Adiciona o repositório Helm do Trivy Operator
-helm repo add aquasecurity https://helm.aquasec.com
+  helm repo add aqua https://aquasecurity.github.io/helm-charts/
+   helm repo update
 
 # Atualiza os repositórios Helm
 helm repo update
