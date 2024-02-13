@@ -4,7 +4,7 @@ metadata:
   name: docksec_pod
 spec:
   containers:
-    -name: docksec
-    image: docksec6/docksec:v1
+    - name: docksec
+      image: docksec6/docksec:v1
       ports:
         - containerPort: 8080
