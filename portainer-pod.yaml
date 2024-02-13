@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: portainer-pod
+spec:
+  containers:
+    -name: portainer
+    image: portainer/portainer-ce
