@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Adiciona o repositório Helm do Trivy Operator
+helm repo add aquasecurity https://helm.aquasec.com
+
+# Atualiza os repositórios Helm
+helm repo update
+
+# Instala o Trivy Operator usando o Helm
+helm install trivy-operator aquasecurity/trivy-operator
