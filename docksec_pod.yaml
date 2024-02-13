@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: docksec_pod
+  name: docksec-pod
 spec:
   containers:
     - name: docksec
