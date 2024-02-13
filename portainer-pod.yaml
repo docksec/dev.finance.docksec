@@ -6,3 +6,5 @@ spec:
   containers:
     -name: portainer
     image: portainer/portainer-ce
+      ports: 
+        - containerPor: 9000
