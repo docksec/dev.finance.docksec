@@ -6,3 +6,5 @@ spec:
   type: ClusterIP
   selector:
     app: portainer-pod
+  ports:
+    - port: 9000
