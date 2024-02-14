@@ -8,5 +8,7 @@ spec:
     app: docksec-pod
   ports:
     - port: 8080
+    nodePort: 8080
+  type: NodePort
   externalIPs:
     - 192.168.28.140
