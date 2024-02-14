@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-docksec-pod
+  namespace: docksec
 spec:
   type: NodePort
   selector:
