@@ -3,12 +3,11 @@ kind: Service
 metadata:
   name: svc-docksec-pod
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: docksec-pod
   ports:
     - port: 8080
-    nodePort: 8080
-  type: NodePort
+      targetPort: 8080
   externalIPs:
     - 192.168.28.140
