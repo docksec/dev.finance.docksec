@@ -1,6 +1,6 @@
 pipeline {
     agent{
-        label 'agentAWS_DEV'
+        label 'dev'
     }
 
     tools {
@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             agent {
-                label 'agentAWS_DEV'
+                label 'dev'
             }
             steps {
                 cleanWs()
@@ -24,7 +24,7 @@ pipeline {
 
         stage('Checkout from Git') {
             agent {
-                label 'agentAWS_DEV'
+                label 'dev'
             }
             steps {
                 git branch: 'master', url: 'https://github.com/docksec/dev.finance.docksec.git'
@@ -49,7 +49,7 @@ pipeline {
 
         stage('Install Dependencies') {
             agent {
-                label 'agentAWS_DEV'
+                label 'dev'
             }
             steps {
                 sh 'npm install'
@@ -58,7 +58,7 @@ pipeline {
 
         stage('Dependency Check (SCA)') {
             agent {
-                label 'agentLocal'
+                label 'dev'
             }
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
@@ -68,7 +68,7 @@ pipeline {
 
         stage('Docker Build & Push') {
             agent {
-                label 'agentAWS_DEV'
+                label 'dev'
             }
             steps {
                 script {
@@ -83,7 +83,7 @@ pipeline {
 
         stage('Container Scan') {
             agent {
-                label 'agentAWS_DEV'
+                label 'dev'
             }
             steps {
                 sh 'trivy image docksec6/docksec:latest > trivyimage.txt'
