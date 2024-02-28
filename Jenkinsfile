@@ -31,15 +31,6 @@ pipeline {
             }
         }
         
-        stage('Install Dependencies') {
-            agent {
-                label 'dev'
-            }
-            steps {
-                sh 'npm install'
-            }
-        }
-        
         stage('Sonarqube (SAST)') {
             agent {
                 label 'dev'
@@ -53,6 +44,15 @@ pipeline {
                 script {
                     waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
+            }
+        }
+        
+        stage('Install Dependencies') {
+            agent {
+                label 'dev'
+            }
+            steps {
+                sh 'npm install'
             }
         }
 
