@@ -33,7 +33,7 @@ pipeline {
 
         stage('Sonarqube (SAST)') {
             agent {
-                label 'agentLocal'
+                label 'dev'
             }
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -92,7 +92,7 @@ pipeline {
 
         stage('Deploy em Homologação') {
             agent {
-                label 'agentAWS_HML'
+                label 'hml'
             }
             environment {
                 tag_version = "latest"
