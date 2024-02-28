@@ -102,6 +102,8 @@ pipeline {
             steps {
                 script {
                     withAWS(credentials: 'aws', region: 'sa-east-1') {
+                        sh 'docker stop docksec-latest'
+                        sh 'docker rm docksec-latest'
                         sh 'docker pull docksec6/docksec:latest'
                         sh 'docker build -t docksec:latest .'
                         sh 'docker run -d --name docksec-latest -p 8080:8080 docksec6/docksec:latest'
