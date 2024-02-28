@@ -93,6 +93,7 @@ pipeline {
             }
             steps {
                 sh 'trivy image docksec6/docksec:latest > trivyimage.txt'
+                sh 'trivy image -f json docksec6/docksec:latest > /home/docksec/API/trivy_results.json'
             }
         }
 
