@@ -52,7 +52,7 @@ pipeline {
                 label 'dev'
             }
             steps {
-                sh 'npm install'
+                sh 'npm install --package-lock'
             }
         }
 
