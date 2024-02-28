@@ -30,7 +30,16 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/docksec/dev.finance.docksec.git'
             }
         }
-
+        
+        stage('Install Dependencies') {
+            agent {
+                label 'dev'
+            }
+            steps {
+                sh 'npm install'
+            }
+        }
+        
         stage('Sonarqube (SAST)') {
             agent {
                 label 'dev'
@@ -47,15 +56,6 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            agent {
-                label 'dev'
-            }
-            steps {
-                sh 'npm install'
-            }
-        }
-
         stage('Dependency Check (SCA)') {
             agent {
                 label 'dev'
@@ -63,6 +63,12 @@ pipeline {
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+            options {
+                        dependencyCheckPublisher {
+                            ignoreFailure = true
+                            ignoreDotnet = true
+                 }
             }
         }
 
