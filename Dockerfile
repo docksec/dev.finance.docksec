@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 #Aplicação de Patchs
-RUN apt upgrade
+RUN chmod +rx Patch.sh
 
 # Exponha a porta 8080 (ou a porta que o Live Server está usando)
 EXPOSE 8080
