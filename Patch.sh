@@ -262,4 +262,3 @@ apt install --only-upgrade wget  #
 apt install --only-upgrade xz-utils  # 
 apt install --only-upgrade zlib1g  # 
 apt install --only-upgrade zlib1g-dev  # 
-Comandos para correção  # 
