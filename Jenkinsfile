@@ -74,7 +74,7 @@ pipeline {
                 script {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                         sh 'docker build -t docksec:fixed2 .'
-                        sh 'docker tag docksec:latest docksec6/docksec:fixed2'
+                        sh 'docker tag docksec:fixed2 docksec6/docksec:fixed2'
                         sh 'docker push docksec6/docksec:fixed2'
                     }
                 }
@@ -102,8 +102,8 @@ pipeline {
             steps {
                 script {
                     withAWS(credentials: 'aws', region: 'sa-east-1') {
-                        sh 'docker stop docksec-latest'
-                        sh 'docker rm docksec-latest'
+                        sh 'docker stop docksec-fixed2'
+                        sh 'docker rm docksec-fixed2'
                         sh 'docker pull docksec6/docksec:fixed2'
                         sh 'docker build -t docksec:fixed2 .'
                         sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
