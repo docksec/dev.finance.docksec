@@ -1,6 +1,6 @@
 #!/bin/bash
-apt-get -y update
-apt-get -y upgrade
+apt-get update
+apt-get upgrade -y
 apt install --only-upgrade apt  # 
 apt install --only-upgrade bash  # 
 apt install --only-upgrade binutils  # 
