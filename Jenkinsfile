@@ -73,21 +73,21 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                        sh 'docker build -t docksec:latest .'
-                        sh 'docker tag docksec:latest docksec6/docksec:latest'
-                        sh 'docker push docksec6/docksec:latest'
+                        sh 'docker build -t docksec:fixed2 .'
+                        sh 'docker tag docksec:latest docksec6/docksec:fixed2'
+                        sh 'docker push docksec6/docksec:fixed2'
                     }
                 }
             }
         }
 
-        stage('Container Scan') {
+        stage('Trivy (Container Scan)') {
             agent {
                 label 'dev'
             }
             steps {
-                sh 'trivy image docksec6/docksec:latest > trivyimage.txt'
-                sh 'trivy image -f json docksec6/docksec:latest > /home/docksec/API/trivy_results.json'
+                sh 'trivy image docksec6/docksec:fixed2 > trivyimage.txt'
+                sh 'trivy image -f json docksec6/docksec:fixed2 > /home/docksec/API/trivy_results.json'
             }
         }
 
@@ -96,7 +96,7 @@ pipeline {
                 label 'hml'
             }
             environment {
-                tag_version = "latest"
+                tag_version = "fixed2"
             }
 
             steps {
@@ -104,9 +104,9 @@ pipeline {
                     withAWS(credentials: 'aws', region: 'sa-east-1') {
                         sh 'docker stop docksec-latest'
                         sh 'docker rm docksec-latest'
-                        sh 'docker pull docksec6/docksec:latest'
-                        sh 'docker build -t docksec:latest .'
-                        sh 'docker run -d --name docksec-latest -p 8080:8080 docksec6/docksec:latest'
+                        sh 'docker pull docksec6/docksec:fixed2'
+                        sh 'docker build -t docksec:fixed2 .'
+                        sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                     }
                 }
             }
