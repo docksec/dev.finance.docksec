@@ -111,7 +111,7 @@ pipeline {
             steps {
                 script {
                     withAWS(credentials: 'aws', region: 'sa-east-1') {
-                        def runningContainer = sh(script: 'docker ps -a --format "{{.Names}}" | grep docksec-fixed2', returnStdout: true).trim()
+                        def runningContainer = sh(script: 'docker ps -a --format "{{.Names}}" | grep -q docksec-fixed2', returnStatus: true)
         
                         if (runningContainer) {
                             sh 'docker stop docksec-fixed2'
