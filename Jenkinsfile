@@ -95,12 +95,27 @@ pipeline {
             }
         }
 
+        stage('Enviar e-mail') {
+            post {
+                always {
+                    emailext attachLog: true,
+                        subject: "'${currentBuild.result}'",
+                        body: "Projeto: ${env.JOB_NAME}\n" +
+                            "Número do Build: ${env.BUILD_NUMBER}\n" +
+                            "Clique no link para análise das vulnerabilidades no Grafana: http://192.168.28.140:3000/d/fe3459f7-9809-448d-a580-b93c728e38b6/trivy?orgId=1\n" +
+                            "Clique no link para aprovação/rejeição: ${env.BUILD_URL}\n",
+                        to: 'docksec6@gmail.com',
+                        attachmentsPattern: 'trivyimage.txt'
+                }
+            }
+        }
+        
         stage('Aguardar Aprovação') {
             steps {
                 input message: 'Por favor, aprove o build para continuar', ok: 'Continuar'
             }
         }
-
+   
         stage('Deploy em Produção') {
             agent {
                 label 'prd'
@@ -118,16 +133,12 @@ pipeline {
             }
         }
     }
-
-    post {
-        always {
-            emailext attachLog: true,
-                subject: "'${currentBuild.result}'",
-                body: "Project: ${env.JOB_NAME}<br/>" +
-                    "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                    "URL: ${env.BUILD_URL}<br/>",
-                to: 'docksec6@gmail.com',
-                attachmentsPattern: 'trivyimage.txt'
-            }
-        }
+     post {
+            always {
+                    emailext attachLog: true,
+                        subject: "'${currentBuild.result}'",
+                        body: "Pipeline concluída",
+                        to: 'docksec6@gmail.com',
+         }
+     }
 }
