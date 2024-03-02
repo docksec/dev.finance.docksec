@@ -6,8 +6,6 @@ pipeline {
     tools {
         jdk 'jdk17'
         nodejs 'node16'
-        // Adicione outras ferramentas, se necessário
-        // Exemplo: maven 'Maven'
     }
 
     environment {
