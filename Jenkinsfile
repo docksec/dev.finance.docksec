@@ -18,7 +18,6 @@ pipeline {
                 cleanWs()
             }
         }
-    }
 
         stage('Checkout from Git') {
             steps {
@@ -88,20 +87,20 @@ pipeline {
                             sh 'docker rm docksec-fixed2'
                         } else {
                             echo 'O contêiner docksec-fixed2 não está em execução. Continuando com o deploy...'
-                            sh 'docker pull docksec6/docksec:fixed2'
-                            sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                         }
+                        sh 'docker pull docksec6/docksec:fixed2'
+                        sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                     }
                 }
             }
         }
-        
+
         stage('Aguardar Aprovação') {
             steps {
                 input message: 'Por favor, aprove o build para continuar', ok: 'Continuar'
             }
         }
-   
+
         stage('Deploy em Produção') {
             agent {
                 label 'prd'
@@ -112,19 +111,23 @@ pipeline {
             steps {
                 script {
                     withAWS(credentials: 'aws', region: 'sa-east-1') {
-                        def runningContainer = sh(script: 'docker ps -a --format "{{.Names}}" | grep docksec-fixed2', returnStdout: true).trim()
-        
-                        if (runningContainer) {
-                            sh 'docker stop docksec-fixed2'
-                            sh 'docker rm docksec-fixed2'
-                        } else {
-                            echo 'O contêiner docksec-fixed2 não está em execução. Continuando com o deploy...'
-                            sh 'docker pull docksec6/docksec:fixed2'
-                            sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
-                        }
+                        sh 'docker pull docksec6/docksec:fixed2'
+                        sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                     }
                 }
             }
         }
-}
+    }
 
+    post {
+        always {
+            emailext attachLog: true,
+                subject: "'${currentBuild.result}'",
+                body: "Project: ${env.JOB_NAME}<br/>" +
+                    "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                    "URL: ${env.BUILD_URL}<br/>",
+                to: 'docksec6@gmail.com',
+                attachmentsPattern: 'trivyimage.txt'
+            }
+        }
+}
