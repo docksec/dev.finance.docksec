@@ -151,6 +151,7 @@ pipeline {
                         subject: "'${currentBuild.result}'",
                         body: "Pipeline concluída",
                         to: 'docksec6@gmail.com',
-         }
-     }
-}
+            }
+    }
+ }
+
