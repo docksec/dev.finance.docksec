@@ -18,6 +18,7 @@ pipeline {
                 cleanWs()
             }
         }
+    }
 
         stage('Checkout from Git') {
             steps {
@@ -125,8 +126,6 @@ pipeline {
                 }
             }
         }
-    }
-}
     post {
         always {
             emailext attachLog: true,
@@ -136,3 +135,4 @@ pipeline {
         }
     }
 }
+
