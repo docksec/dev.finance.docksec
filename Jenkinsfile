@@ -87,6 +87,8 @@ pipeline {
                             sh 'docker rm docksec-fixed2'
                         } else {
                             echo 'O contêiner docksec-fixed2 não está em execução. Continuando com o deploy...'
+                            sh 'docker pull docksec6/docksec:fixed2'
+                            sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                         }
                         sh 'docker pull docksec6/docksec:fixed2'
                         sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
@@ -133,6 +135,8 @@ pipeline {
                             sh 'docker rm docksec-fixed2'
                         } else {
                             echo 'O contêiner docksec-fixed2 não está em execução. Continuando com o deploy...'
+                            sh 'docker pull docksec6/docksec:fixed2'
+                            sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                         }
                         sh 'docker pull docksec6/docksec:fixed2'
                         sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
