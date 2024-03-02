@@ -125,7 +125,7 @@ pipeline {
                 }
             }
         }
-
+    }
 
     post {
         always {
@@ -138,5 +138,4 @@ pipeline {
                 attachmentsPattern: 'trivyimage.txt'
             }
         }
-    }
 }
