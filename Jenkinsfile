@@ -98,7 +98,7 @@ pipeline {
         stage('Aguardar Aprovação') {
             steps {
                 input message: 'Por favor, aprove o build para continuar', ok: 'Continuar'
-
+        
                 // Envio de e-mail no meio do segundo estágio
                 emailext (
                     subject: "'${currentBuild.result}'",
@@ -107,11 +107,12 @@ pipeline {
                         "Clique no link para visualizar as vulnerabilidades no Grafana: (http://192.168.28.140:3000/d/fe3459f7-9809-448d-a580-b93c728e38b6/trivy?orgId=1) /n" +
                         "Clique no link para aprovação/reijeição do deploy em Produção: ${env.BUILD_URL}/n",
                     to: 'docksec6@gmail.com',
-                    attachmentsPattern: 'trivyimage.txt'
+                    attachmentsPattern: 'trivyimage.txt', // Adicione a vírgula aqui
                     attachLog: true
                 )
             }
         }
+
 
         stage('Deploy em Produção') {
             agent {
