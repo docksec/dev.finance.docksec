@@ -7,10 +7,6 @@ WORKDIR /usr/src/app
 # Copie o conteúdo do diretório da sua aplicação para o contêiner
 COPY . .
 
-#Aplicação de Patchs
-RUN chmod +rx Patch.sh
-RUN ./Patch.sh
-
 # Exponha a porta 8080 (ou a porta que o Live Server está usando)
 EXPOSE 8080
 
