@@ -105,7 +105,6 @@ pipeline {
                         sh 'docker stop docksec-fixed2'
                         sh 'docker rm docksec-fixed2'
                         sh 'docker pull docksec6/docksec:fixed2'
-                        sh 'docker build -t docksec:fixed2 .'
                         sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                     }
                 }
@@ -113,15 +112,40 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            emailext attachLog: true,
-                subject: "'${currentBuild.result}'",
-                body: "Project: ${env.JOB_NAME}<br/>" +
-                    "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                    "URL: ${env.BUILD_URL}<br/>",
-                to: 'docksec6@gmail.com',
-                attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+            post {
+                always {
+                    emailext attachLog: true,
+                        subject: "'${currentBuild.result}'",
+                        body: "Project: ${env.JOB_NAME}<br/>" +
+                            "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                            "URL: ${env.BUILD_URL}<br/>",
+                        to: 'docksec6@gmail.com',
+                        attachmentsPattern: 'trivyimage.txt'
+                }
+            }
+        stage('Aguardar Aprovação') {
+                steps {
+                    input message: 'Por favor, aprove o build para continuar', ok: 'Continuar'
+                }
+            }
+
+        stage('Deploy em Produção') {
+            agent {
+                label 'prd'
+            }
+            environment {
+                tag_version = "fixed2"
+            }
+
+            steps {
+                script {
+                    withAWS(credentials: 'aws', region: 'sa-east-1') {
+                        sh 'docker stop docksec-fixed2'
+                        sh 'docker rm docksec-fixed2'
+                        sh 'docker pull docksec6/docksec:fixed2'
+                        sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
+                    }
+                }
+            }
         }
-    }
 }
