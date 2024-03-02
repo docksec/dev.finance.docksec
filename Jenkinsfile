@@ -136,6 +136,7 @@ pipeline {
                     "URL: ${env.BUILD_URL}<br/>",
                 to: 'docksec6@gmail.com',
                 attachmentsPattern: 'trivyimage.txt'
+            }
         }
     }
 }
