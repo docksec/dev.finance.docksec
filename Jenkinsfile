@@ -90,8 +90,6 @@ pipeline {
                             sh 'docker pull docksec6/docksec:fixed2'
                             sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                         }
-                        sh 'docker pull docksec6/docksec:fixed2'
-                        sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                     }
                 }
             }
@@ -138,21 +136,17 @@ pipeline {
                             sh 'docker pull docksec6/docksec:fixed2'
                             sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                         }
-                        sh 'docker pull docksec6/docksec:fixed2'
-                        sh 'docker run -d --name docksec-fixed2 -p 8080:8080 docksec6/docksec:fixed2'
                     }
                 }
             }
         }
     }
-     post {
-            always {
-                    emailext attachLog: true,
-                        subject: "'${currentBuild.result}'",
-                        body: "Pipeline concluída",
-                        to: 'docksec6@gmail.com',
-                        }
-      }
+    post {
+        always {
+            emailext attachLog: true,
+            subject: "'${currentBuild.result}'",
+            body: "Pipeline concluída",
+            to: 'docksec6@gmail.com',
+        }
     }
- }
-
+}
