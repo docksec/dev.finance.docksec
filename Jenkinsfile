@@ -29,7 +29,7 @@ pipeline {
                         -H 'Content-Type: multipart/form-data' \
                         -F 'test=1' \
                         -F 'file=@/home/docksec/API/trivy_results.json;type=application/json' \
-                        -F 'scan_type=Trivy Scan JSON Report' \
+                        -F 'scan_type=Trivy Scan' \
                         -F 'tags=test'
                     """
                 }
