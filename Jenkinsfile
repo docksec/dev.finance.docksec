@@ -33,7 +33,7 @@ pipeline {
                         -Dsonar.projectKey=Dev.finance"""
                 }
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
             }
         }
