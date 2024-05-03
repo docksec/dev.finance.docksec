@@ -73,6 +73,8 @@ pipeline {
         stage('Upload to DefectDojo') {
             steps {
                 script {
+                    def USERNAME = 'rafael-docksec'
+                    def API_TOKEN = '11d4e6e4735b2f5f18d2105988f1943dca'
                     def crumb = sh (
                         script: 'curl -s "http://192.168.28.140:8080/crumbIssuer/api/json"',
                         returnStdout: true
@@ -80,6 +82,7 @@ pipeline {
         
                     sh """
                     curl -X POST http://localhost:8080/api/v2/reimport-scan/ \
+                        -u "${USERNAME}:${API_TOKEN}" \
                         -H 'accept: application/json' \
                         -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
                         -H 'Content-Type: multipart/form-data' \
