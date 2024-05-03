@@ -86,10 +86,11 @@ pipeline {
                     '''
                 }
             }
+        }
 
         stage('Aguardar Aprovação') {
             steps {
-               emailext (
+                emailext (
                     subject: "Aprovação para Produção",
                     body: "Project: ${env.JOB_NAME}" +
                         "Build Number: ${env.BUILD_NUMBER}"+
@@ -113,7 +114,6 @@ pipeline {
                     "URL: ${env.BUILD_URL}<br/>",
                 to: 'docksec6@gmail.com',
                 attachmentsPattern: 'trivyimage.txt'
-            }
         }
     }
 }
