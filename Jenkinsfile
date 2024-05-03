@@ -73,18 +73,22 @@ pipeline {
         stage('Upload to DefectDojo') {
             steps {
                 script {
-                    sh '''
-                    curl -X 'POST' \
-                          'http://localhost:8080/api/v2/reimport-scan/' \
-                          -H 'accept: application/json' \
-                          -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
-                          -H 'Content-Type: multipart/form-data' \
-                          -H 'Jenkins-Crumb: 3e8d425b3a1a1e05ce5e19e715eb7f1eb66c1a60bb069dc5bccbc5302d7faa2b' \
-                          -F 'test=2' \
-                          -F 'file=@/home/docksec/API2/trivy_results.json;type=application/json' \
-                          -F 'scan_type=Trivy Scan JSON Report' \
-                          -F 'tags=test' \
-                    '''
+                    def crumb = sh (
+                        script: 'curl -s "http://192.168.28.140:8080/crumbIssuer/api/json"',
+                        returnStdout: true
+                    ).trim().tokenize('"')[3]
+        
+                    sh """
+                    curl -X POST http://localhost:8080/api/v2/reimport-scan/ \
+                        -H 'accept: application/json' \
+                        -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
+                        -H 'Content-Type: multipart/form-data' \
+                        -H 'Jenkins-Crumb: ${crumb}' \
+                        -F 'test=2' \
+                        -F 'file=@/home/docksec/API2/trivy_results.json;type=application/json' \
+                        -F 'scan_type=Trivy Scan JSON Report' \
+                        -F 'tags=test'
+                    """
                 }
             }
         }
