@@ -115,4 +115,5 @@ pipeline {
                 attachmentsPattern: 'trivyimage.txt'
             }
         }
+    }
 }
