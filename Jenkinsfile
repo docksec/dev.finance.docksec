@@ -21,19 +21,14 @@ pipeline {
         
         stage('Upload to DefectDojo') {
             steps {
-                script {
-                    def crumb = sh (
-                        script: 'curl -s "http://192.168.28.140:8080/crumbIssuer/api/json"',
-                        returnStdout: true
-                    ).trim()
-        
+                script {      
                     sh """
                     curl -X POST http://localhost:8080/api/v2/reimport-scan/ \
-                        -u rafael-docksec:36cdc6df462c43a28aee6d71cbf4a171 \
+                        -u "rafael-docksec:36cdc6df462c43a28aee6d71cbf4a171" \
+                        -H "Jenkins-Crumb:3e8d425b3a1a1e05ce5e19e715eb7f1eb66c1a60bb069dc5bccbc5302d7faa2b" \
                         -H 'accept: application/json' \
                         -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
                         -H 'Content-Type: multipart/form-data' \
-                        -H '${crumb}' \
                         -F 'test=2' \
                         -F 'file=@/home/docksec/API2/trivy_results.json;type=application/json' \
                         -F 'scan_type=Trivy Scan JSON Report' \
