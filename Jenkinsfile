@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script {      
                     sh """
-                    ./nessus_export.sh
+                    ${nessus}./nessus_export.sh
                     """
                 }
             }
