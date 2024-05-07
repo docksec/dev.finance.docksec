@@ -10,6 +10,8 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
+        NESSUS_USERNAME = credentials ('Username')
+        NESSUS_PASSWORD = credentials ('Password')
     }
 
     stages {
@@ -21,16 +23,65 @@ pipeline {
         
         stage('Upload to DefectDojo') {
             steps {
+                withCredentials (CredentialsID: 'Username', CredentialsID: 'Password',)
                 script {      
                     sh """
-                    curl -X POST http://192.168.0.3:8080/api/v2/reimport-scan/ \
-                        -H 'accept: application/json' \
-                        -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
-                        -H 'Content-Type: multipart/form-data' \
-                        -F 'test=1' \
-                        -F 'file=@/home/docksec/API/trivy_results.json;type=application/json' \
-                        -F 'scan_type=Trivy Scan' \
-                        -F 'tags=test'
+                    // curl -X POST http://192.168.0.3:8080/api/v2/reimport-scan/ \
+                    //     -H 'accept: application/json' \
+                    //     -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
+                    //     -H 'Content-Type: multipart/form-data' \
+                    //     -F 'test=1' \
+                    //     -F 'file=@/home/docksec/API/trivy_results.json;type=application/json' \
+                    //     -F 'scan_type=Trivy Scan' \
+                    //     -F 'tags=test'
+                    
+                    token=$(curl -s -k -X POST -H "Content-Type: application/json" -d "{\"username\":\"${NESSUS_USERNAME}\",\"password\":\"${NESSUS_PASSWORD}\"}" https://192.168.28.140:8834/session | jq -r '.token')
+                    
+                    if [ -z "$token" ]; then
+                        echo "Erro ao obter o token. Verifique suas credenciais."
+                        exit 1
+                    fi
+                    
+                   echo "Token obtido com sucesso: $token"
+                    
+                   file_id=$(curl -s -k -X POST -H "Content-Type: application/json" -H "X-Cookie: token=$token" -d '{"format": "nessus"}' https://192.168.28.140:8834/scans/12/export | jq -r '.file')
+                    
+                   if [ -z "$file_id" ]; then
+                        echo "Erro ao obter o ID do download do relatório."
+                        exit 1
+                    fi
+                    
+                    echo "ID do download do relatório obtido com sucesso: $file_id"
+                    
+                    while true; do
+                    
+                    status=$(curl -s -k -X GET -H "Content-Type: application/json" -H "X-Cookie: token=$token" https://192.168.28.140:8834/scans/12/export/$file_id/status | jq -r '.status')
+                    
+                    if [ "$status" == "ready" ]; then
+                            echo "O relatório está pronto para download."
+                    break
+                            echo "O relatório ainda está sendo gerado. Aguarde..."
+                            sleep 10
+                    fi
+                    done
+                   
+                    curl -s -k -X GET -H "X-Cookie: token=$token" https://192.168.28.140:8834/scans/12/export/$file_id/download > /home/docksec/API/scan_report.nessus
+                    
+                    if [ $? -eq 0 ]; then
+                        echo "Relatório baixado com sucesso em /home/docksec/API/scan_report.nessus"
+                    else
+                        echo "Erro ao baixar o relatório."
+                        exit 1
+                    fi
+                    
+                    curl -s -k -X POST http://192.168.0.3:8080/api/v2/reimport-scan/ \
+                                            -H 'accept: application/json' \
+                                            -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
+                                            -H 'Content-Type: multipart/form-data' \
+                                            -F 'test=4' \
+                                            -F "file=@/home/docksec/API/scan_report.nessus;type=application/xml" \
+                                            -F 'scan_type=Tenable Scan' \
+                                            -F 'tags=dast'
                     """
                 }
             }
