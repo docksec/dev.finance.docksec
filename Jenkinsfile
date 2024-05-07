@@ -23,15 +23,6 @@ pipeline {
             steps {
                 script {      
                     sh """
-                    // curl -X POST http://192.168.0.3:8080/api/v2/reimport-scan/ \
-                    //     -H 'accept: application/json' \
-                    //     -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
-                    //     -H 'Content-Type: multipart/form-data' \
-                    //     -F 'test=1' \
-                    //     -F 'file=@/home/docksec/API/trivy_results.json;type=application/json' \
-                    //     -F 'scan_type=Trivy Scan' \
-                    //     -F 'tags=test'
-
                     ./nessus_export.sh
                     """
                 }
