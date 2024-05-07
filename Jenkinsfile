@@ -23,7 +23,7 @@ pipeline {
         
         stage('Upload to DefectDojo') {
             steps {
-                withCredentials (CredentialsID: 'Username', CredentialsID: 'Password',)
+                withCredentials (CredentialsID: 'Username', CredentialsID: 'Password')
                 script {      
                     sh """
                     // curl -X POST http://192.168.0.3:8080/api/v2/reimport-scan/ \
