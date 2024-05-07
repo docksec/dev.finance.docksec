@@ -35,7 +35,7 @@ pipeline {
                     //     -F 'scan_type=Trivy Scan' \
                     //     -F 'tags=test'
                     
-                    token=$(curl -s -k -X POST -H "Content-Type: application/json" -d "{\"username\":\"${NESSUS_USERNAME}\",\"password\":\"${NESSUS_PASSWORD}\"}" https://192.168.28.140:8834/session | jq -r '.token')
+                    token=$(curl -s -k -X POST -H "Content-Type: application/json" -d "{\\"username\\":\\"${NESSUS_USERNAME}\\",\\"password\\":\\"${NESSUS_PASSWORD}\\"}" https://192.168.28.140:8834/session | jq -r '.token')
                     
                     if [ -z "$token" ]; then
                         echo "Erro ao obter o token. Verifique suas credenciais."
