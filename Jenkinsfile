@@ -74,7 +74,7 @@ pipeline {
             steps {
                 script {      
                     sh """
-                    curl -X POST http://192.168.0.3:8080/api/v2/reimport-scan/ \
+                    curl -X POST http://192.168.0.2:8080/api/v2/reimport-scan/ \
                         -H 'accept: application/json' \
                         -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
                         -H 'Content-Type: multipart/form-data' \
