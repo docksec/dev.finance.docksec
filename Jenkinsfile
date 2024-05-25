@@ -106,7 +106,7 @@ pipeline {
                         -H 'Content-Type: multipart/form-data' \
                         -F 'product_name=Dev.Finance' \
                         -F 'engagement_name=POC' \
-                        -F 'file=@${reportTrivyPath}/trivy_results.json;type=application/json' \
+                        -F 'file=@${reportTrivyPath};type=application/json' \
                         -F 'scan_type=Trivy Scan' \
                         -F 'tags=Container Scan,Trivy CLI' \
                         -F 'active=true' \
