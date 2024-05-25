@@ -31,6 +31,49 @@ pipeline {
             }
         }
         
+        stage('Sonarqube (SAST)') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh """${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectName=Dev.finance \
+                        -Dsonar.projectKey=Dev.finance"""
+                }
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
+                }
+            }
+        }
+
+        stage('Dependency Check (SCA)') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh """
+                        docker build -t docksec:fixed2 .
+                        docker tag docksec:fixed2 docksec6/docksec:fixed2
+                        docker push docksec6/docksec:fixed2
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Trivy (Container Scan)') {
+            steps {
+                sh """
+                 trivy image docksec6/docksec:fixed2 > trivyimage.txt
+                 trivy image -f json docksec6/docksec:fixed2 > /home/docksec/API/trivy_results.json
+                 """
+            }
+        }
+        
         stage('Upload to DefectDojo') {
             steps {
                 script {
@@ -76,50 +119,7 @@ pipeline {
                 }
             }
         }
-
-        stage('Sonarqube (SAST)') {
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh """${SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectName=Dev.finance \
-                        -Dsonar.projectKey=Dev.finance"""
-                }
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
-                }
-            }
-        }
-
-        stage('Dependency Check (SCA)') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
-
-        stage('Docker Build & Push') {
-            steps {
-                script {
-                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                        sh """
-                        docker build -t docksec:fixed2 .
-                        docker tag docksec:fixed2 docksec6/docksec:fixed2
-                        docker push docksec6/docksec:fixed2
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Trivy (Container Scan)') {
-            steps {
-                sh """
-                 trivy image docksec6/docksec:fixed2 > trivyimage.txt
-                 trivy image -f json docksec6/docksec:fixed2 > /home/docksec/API/trivy_results.json
-                 """
-            }
-        }
-
+        
         stage('Deploy em Homologação') {
             agent {
                 label 'hml'
