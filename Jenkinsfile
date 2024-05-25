@@ -86,7 +86,7 @@ pipeline {
                     sh """
                     curl -s -k -X POST "${defectDojoUrl}" \
                         -H 'accept: application/json' \
-                        -H 'Authorization: Token ${defectDojoApiKey}' \
+                        -H 'Authorization: Token 6fc2aa245784571d63c26b4b16da08de5c639fe2' \
                         -H 'Content-Type: multipart/form-data' \
                         -F 'engagement=${engagementId}' \
                         -F 'file=@${reportDPCheck.path};type=application/xml' \
@@ -101,7 +101,7 @@ pipeline {
                     sh """
                     curl -s -k -X POST "${defectDojoUrl}" \
                         -H 'accept: application/json' \
-                        -H 'Authorization: Token ${defectDojoApiKey}' \
+                        -H 'Authorization: Token 6fc2aa245784571d63c26b4b16da08de5c639fe2' \
                         -H 'Content-Type: multipart/form-data' \
                         -F 'engagement=${engagementId}' \
                         -F 'file=@${reportTrivyPath};type=application/json' \
