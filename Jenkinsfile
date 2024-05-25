@@ -10,9 +10,6 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        KUBECONFIG = '/path/to/your/kubeconfig'
-        NAMESPACE = 'default'
-        CONTAINER_IMAGE = 'your-container-image'
     }
 
     stages {
@@ -126,6 +123,15 @@ pipeline {
             }
         }
         
+        stage('Deploy em Kubernetes') {
+            steps {
+                script {
+                    sh 'kubectl apply -f docksec-deployment.yaml'
+                    }
+                }
+            }
+        }
+
         stage('Deploy em Homologação') {
             agent {
                 label 'hml'
