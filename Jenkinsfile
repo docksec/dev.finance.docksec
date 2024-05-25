@@ -37,7 +37,7 @@ pipeline {
                     def defectDojoApiKey = credentials('DEFECTDOJO_API_KEY')
                     def defectDojoUrl = 'http://192.168.0.4:8080/api/v2/import-scan/'
                     def reportDPCheck = findFiles(glob: '**/dependency-check-report.xml')[0]
-                    def reportTrivy = "${trivy_results}/trivy_results.json"
+                    def reportTrivyPath = "/home/docksec/API/trivy_results.json"
                     def engagementId = '30'
                     
                     sh """
@@ -61,14 +61,15 @@ pipeline {
                         -H 'Authorization: Token ${defectDojoApiKey}' \
                         -H 'Content-Type: multipart/form-data' \
                         -F 'engagement=${engagementId}' \
-                        -F 'file=@${reportTrivy.path};type=application/json' \
+                        -F 'file=@${reportTrivyPath};type=application/json' \
                         -F 'scan_type=Trivy Scan' \
                         -F 'tags=Container Scan,Trivy CLI' \
                         -F 'active=true' \
                         -F 'verified=true' \
                         -F 'environment=Development' \
                         -F 'version=1.0.0'
-                    """                    
+                    """
+                    
                     sh """
                     ${nessus}/nessus_export.sh
                     """
@@ -116,51 +117,6 @@ pipeline {
                  trivy image docksec6/docksec:fixed2 > trivyimage.txt
                  trivy image -f json docksec6/docksec:fixed2 > /home/docksec/API/trivy_results.json
                  """
-            }
-        }
-
-        stage('Upload to DefectDojo') {
-            steps {
-                script {
-                    def defectDojoApiKey = credentials('DEFECTDOJO_API_KEY')
-                    def defectDojoUrl = 'http://192.168.0.4:8080/api/v2/import-scan/'
-                    def reportDPCheck = findFiles(glob: '**/dependency-check-report.xml')[0]
-                    def reportTrivy = "${trivy_results}/trivy_results.json"
-                    def engagementId = '30'
-                    
-                    sh """
-                    curl -s -k -X POST "${defectDojoUrl}" \
-                        -H 'accept: application/json' \
-                        -H 'Authorization: Token ${defectDojoApiKey}' \
-                        -H 'Content-Type: multipart/form-data' \
-                        -F 'engagement=${engagementId}' \
-                        -F 'file=@${reportDPCheck.path};type=application/xml' \
-                        -F 'scan_type=Dependency Check Scan' \
-                        -F 'tags=SCA,dependency-check' \
-                        -F 'active=true' \
-                        -F 'verified=true' \
-                        -F 'environment=Development' \
-                        -F 'version=1.0.0'
-                    """
-
-                    sh """
-                    curl -s -k -X POST "${defectDojoUrl}" \
-                        -H 'accept: application/json' \
-                        -H 'Authorization: Token ${defectDojoApiKey}' \
-                        -H 'Content-Type: multipart/form-data' \
-                        -F 'engagement=${engagementId}' \
-                        -F 'file=@${reportTrivy.path};type=application/json' \
-                        -F 'scan_type=Trivy Scan' \
-                        -F 'tags=Container Scan,Trivy CLI' \
-                        -F 'active=true' \
-                        -F 'verified=true' \
-                        -F 'environment=Development' \
-                        -F 'version=1.0.0'
-                    """                    
-                    sh """
-                    ${nessus}/nessus_export.sh
-                    """
-                }
             }
         }
 
