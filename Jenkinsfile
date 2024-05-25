@@ -77,7 +77,7 @@ pipeline {
         stage('Deploy em Kubernetes') {
             steps {
                 script {
-                    sh 'kubectl apply -f /home/docksec/docksec-deployment.yaml'
+                    sh 'kubectl apply -f /home/docksec/docksec-deployment.yaml --validate=false'
                 }
             }
         }
