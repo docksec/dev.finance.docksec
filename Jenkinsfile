@@ -80,7 +80,7 @@ pipeline {
                     def defectDojoApiKey = credentials('DEFECTDOJO_API_KEY')
                     def defectDojoUrl = 'https://192.168.0.4:8080/api/v2/import-scan/'
                     def reportDPCheck = findFiles(glob: '**/dependency-check-report.xml')[0]
-                    def reportTrivy = findFiles(glob: "**/trivy_results.json")[0]
+                    def reportTrivy = "${trivy_results}/trivy_results.json)"
                     def engagementId = '30'
                     
                     def dpCheckPayload = """
