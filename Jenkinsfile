@@ -10,7 +10,6 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        TRIVY_RESULTS_DIR = 'trivy_results'
     }
 
     stages {
@@ -69,9 +68,8 @@ pipeline {
         stage('Trivy (Container Scan)') {
             steps {
                 sh """
-                 mkdir -p ${TRIVY_RESULTS_DIR}
                  trivy image docksec6/docksec:fixed2 > trivyimage.txt
-                 trivy image -f json docksec6/docksec:fixed2 > ${TRIVY_RESULTS_DIR}/trivy_results.json
+                 trivy image -f json docksec6/docksec:fixed2 > ${trivy_results}/trivy_results.json
                  """
             }
         }
@@ -82,7 +80,7 @@ pipeline {
                     def defectDojoApiKey = credentials('DEFECTDOJO_API_KEY')
                     def defectDojoUrl = 'https://192.168.0.4:8080/api/v2/import-scan/'
                     def reportDPCheck = findFiles(glob: '**/dependency-check-report.xml')[0]
-                    def reportTrivy = findFiles(glob: "${TRIVY_RESULTS_DIR}/trivy_results.json")[0]
+                    def reportTrivy = findFiles(glob: "${trivy_results}/trivy_results.json")[0]
                     def engagementId = '30'
                     
                     def dpCheckPayload = """
