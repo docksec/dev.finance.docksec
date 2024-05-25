@@ -101,7 +101,7 @@ pipeline {
                     """
                     
                     httpRequest acceptType: 'APPLICATION_JSON',
-                                contentType: 'MULTIPART_FORM_DATA',
+                                contentType: 'APPLICATION_JSON',
                                 httpMode: 'POST',
                                 requestBody: dpCheckPayload,
                                 responseHandle: 'STRING',
@@ -130,7 +130,7 @@ pipeline {
                     """
                     
                     httpRequest acceptType: 'APPLICATION_JSON',
-                                contentType: 'MULTIPART_FORM_DATA',
+                                contentType: 'APPLICATION_JSON',
                                 httpMode: 'POST',
                                 requestBody: trivyCLIPayload,
                                 responseHandle: 'STRING',
