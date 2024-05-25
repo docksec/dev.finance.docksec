@@ -88,14 +88,13 @@ pipeline {
                         -H 'accept: application/json' \
                         -H 'Authorization: Token 6fc2aa245784571d63c26b4b16da08de5c639fe2' \
                         -H 'Content-Type: multipart/form-data' \
-                        -F 'product_name=Dev.Finance' \
-                        -F 'engagement_name=POC' \
                         -F 'file=@${reportDPCheck.path};type=application/xml' \
                         -F 'scan_type=Dependency Check Scan' \
                         -F 'tags=SCA,dependency-check' \
                         -F 'active=true' \
                         -F 'verified=true' \
                         -F 'environment=Development' \
+                        -F 'test=41' \
                         -F 'version=1.0.0'
                     """
 
@@ -112,6 +111,7 @@ pipeline {
                         -F 'active=true' \
                         -F 'verified=true' \
                         -F 'environment=Development' \
+                        -F 'test=40' \
                         -F 'version=1.0.0'
                     """
                     
