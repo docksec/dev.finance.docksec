@@ -10,6 +10,9 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
+        KUBECONFIG = '/path/to/your/kubeconfig'
+        NAMESPACE = 'default'
+        CONTAINER_IMAGE = 'your-container-image'
     }
 
     stages {
@@ -88,7 +91,8 @@ pipeline {
                         -H 'accept: application/json' \
                         -H 'Authorization: Token 6fc2aa245784571d63c26b4b16da08de5c639fe2' \
                         -H 'Content-Type: multipart/form-data' \
-                        -F 'engagement=${engagementId}' \
+                        -F 'product_name=Dev.finance' \
+                        -F 'engagement_name=POC' \
                         -F 'file=@${reportDPCheck.path};type=application/xml' \
                         -F 'scan_type=Dependency Check Scan' \
                         -F 'tags=SCA,dependency-check' \
@@ -103,8 +107,9 @@ pipeline {
                         -H 'accept: application/json' \
                         -H 'Authorization: Token 6fc2aa245784571d63c26b4b16da08de5c639fe2' \
                         -H 'Content-Type: multipart/form-data' \
-                        -F 'engagement=${engagementId}' \
-                        -F 'file=@${reportTrivyPath};type=application/json' \
+                        -F 'product_name=Dev.finance' \
+                        -F 'engagement_name=POC' \
+                        -F 'file=@${reportTrivyPath}/trivy_results.json;type=application/json' \
                         -F 'scan_type=Trivy Scan' \
                         -F 'tags=Container Scan,Trivy CLI' \
                         -F 'active=true' \
@@ -115,6 +120,7 @@ pipeline {
                     
                     sh """
                     ${nessus}/nessus_export.sh
+                    ${nessus}/k8s.sh
                     """
                 }
             }
