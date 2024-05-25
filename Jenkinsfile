@@ -10,6 +10,7 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
+        TRIVY_RESULTS_DIR = 'trivy_results'
     }
 
     stages {
@@ -25,80 +26,12 @@ pipeline {
             }
         }
 
-        stage('Upload to DefectDojo') {
+        stage('Install Dependencies') {
             steps {
-                script {
-                        def defectDojoApiKey = credentials('DEFECTDOJO_API_KEY')
-                        def defectDojoUrl = 'https://192.168.0.4:8080/api/v2/import-scan/'
-                        def reportDP-Check = findFiles(glob: '**/dependency-check-report.xml')[0]
-                        def reportTrivy = findFiles(glob: '${trivy}/trivy_results.json')[0]
-                        def engagementId = '30'
-            
-                        def DP Check = """
-                        {
-                            "scan_type": "Dependency Check Scan",
-                            "engagement": ${engagementId},
-                            "file": null,
-                            "active": true,
-                            "verified": true,
-                            "scan_date": "${new Date().format('yyyy-MM-dd')}",
-                            "tags": "jenkins,dependency-check",
-                            "minimum_severity": "Low",
-                            "close_old_findings": true,
-                            "push_to_jira": false,
-                            "environment": "Development",
-                            "version": "1.0.0"
-                        }
-                        """
-            
-                        httpRequest acceptType: 'APPLICATION_JSON',
-                                    contentType: 'MULTIPART_FORM_DATA',
-                                    httpMode: 'POST',
-                                    requestBody: DP Check,
-                                    responseHandle: 'STRING',
-                                    url: defectDojoUrl,
-                                    customHeaders: [
-                                        [name: 'Authorization', value: "Token ${defectDojoApiKey}"]
-                                    ],
-                                    uploadFile: reportDP-Check.path,
-                                    multipartName: 'file'     
-
-                    def Trivy CLI = """
-                        {
-                            "scan_type": "Trivy Scan",
-                            "engagement": ${engagementId},
-                            "file": null,
-                            "active": true,
-                            "verified": true,
-                            "scan_date": "${new Date().format('yyyy-MM-dd')}",
-                            "tags": "jenkins,Trivy CLI",
-                            "minimum_severity": "Low",
-                            "close_old_findings": true,
-                            "push_to_jira": false,
-                            "environment": "Development",
-                            "version": "1.0.0"
-                        }
-                        """
-                    
-                            httpRequest acceptType: 'APPLICATION_JSON',
-                                        contentType: 'MULTIPART_FORM_DATA',
-                                        httpMode: 'POST',
-                                        requestBody: Trivy CLI,
-                                        responseHandle: 'STRING',
-                                        url: defectDojoUrl,
-                                        customHeaders: [
-                                            [name: 'Authorization', value: "Token ${defectDojoApiKey}"]
-                                        ],
-                                        uploadFile: reportTrivy.path,
-                                        multipartName: 'file'    
-                    
-                    sh """
-                    ${nessus}/nessus_export.sh
-                    """
-                }
+                sh 'npm install --package-lock'
             }
         }
-
+        
         stage('Sonarqube (SAST)') {
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -109,12 +42,6 @@ pipeline {
                 script {
                     waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install --package-lock'
             }
         }
 
@@ -142,9 +69,84 @@ pipeline {
         stage('Trivy (Container Scan)') {
             steps {
                 sh """
+                 mkdir -p ${TRIVY_RESULTS_DIR}
                  trivy image docksec6/docksec:fixed2 > trivyimage.txt
-                 trivy image -f json docksec6/docksec:fixed2 > ${trivy}/trivy_results.json
+                 trivy image -f json docksec6/docksec:fixed2 > ${TRIVY_RESULTS_DIR}/trivy_results.json
                  """
+            }
+        }
+
+        stage('Upload to DefectDojo') {
+            steps {
+                script {
+                    def defectDojoApiKey = credentials('DEFECTDOJO_API_KEY')
+                    def defectDojoUrl = 'https://192.168.0.4:8080/api/v2/import-scan/'
+                    def reportDPCheck = findFiles(glob: '**/dependency-check-report.xml')[0]
+                    def reportTrivy = findFiles(glob: "${TRIVY_RESULTS_DIR}/trivy_results.json")[0]
+                    def engagementId = '30'
+                    
+                    def dpCheckPayload = """
+                    {
+                        "scan_type": "Dependency Check Scan",
+                        "engagement": ${engagementId},
+                        "file": null,
+                        "active": true,
+                        "verified": true,
+                        "scan_date": "${new Date().format('yyyy-MM-dd')}",
+                        "tags": "jenkins,dependency-check",
+                        "minimum_severity": "Low",
+                        "close_old_findings": true,
+                        "push_to_jira": false,
+                        "environment": "Development",
+                        "version": "1.0.0"
+                    }
+                    """
+                    
+                    httpRequest acceptType: 'APPLICATION_JSON',
+                                contentType: 'MULTIPART_FORM_DATA',
+                                httpMode: 'POST',
+                                requestBody: dpCheckPayload,
+                                responseHandle: 'STRING',
+                                url: defectDojoUrl,
+                                customHeaders: [
+                                    [name: 'Authorization', value: "Token ${defectDojoApiKey}"]
+                                ],
+                                uploadFile: reportDPCheck.path,
+                                multipartName: 'file'
+                    
+                    def trivyCLIPayload = """
+                    {
+                        "scan_type": "Trivy Scan",
+                        "engagement": ${engagementId},
+                        "file": null,
+                        "active": true,
+                        "verified": true,
+                        "scan_date": "${new Date().format('yyyy-MM-dd')}",
+                        "tags": "jenkins,Trivy CLI",
+                        "minimum_severity": "Low",
+                        "close_old_findings": true,
+                        "push_to_jira": false,
+                        "environment": "Development",
+                        "version": "1.0.0"
+                    }
+                    """
+                    
+                    httpRequest acceptType: 'APPLICATION_JSON',
+                                contentType: 'MULTIPART_FORM_DATA',
+                                httpMode: 'POST',
+                                requestBody: trivyCLIPayload,
+                                responseHandle: 'STRING',
+                                url: defectDojoUrl,
+                                customHeaders: [
+                                    [name: 'Authorization', value: "Token ${defectDojoApiKey}"]
+                                ],
+                                uploadFile: reportTrivy.path,
+                                multipartName: 'file'
+                    
+                    sh """
+                    ${nessus}/nessus_export.sh
+                    """
+                }
             }
         }
 
@@ -169,10 +171,10 @@ pipeline {
             steps {
                emailext (
                     subject: "Aprovação para Produção",
-                    body: "Project: ${env.JOB_NAME}" +
-                        "Build Number: ${env.BUILD_NUMBER}"+
-                        "Clique no link para visualizar as vulnerabilidades no Grafana: (http://192.168.28.140:3000/d/fe3459f7-9809-448d-a580-b93c728e38b6/trivy?orgId=1)" +
-                        "Clique no link para aprovação/reijeição do deploy em Produção: ${env.BUILD_URL}",
+                    body: "Project: ${env.JOB_NAME}<br/>" +
+                        "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                        "Clique no link para visualizar as vulnerabilidades no Grafana: (http://192.168.28.140:3000/d/fe3459f7-9809-448d-a580-b93c728e38b6/trivy?orgId=1)<br/>" +
+                        "Clique no link para aprovação/rejeição do deploy em Produção: ${env.BUILD_URL}",
                     to: 'docksec6@gmail.com',
                     attachmentsPattern: 'trivyimage.txt',
                     attachLog: true
@@ -180,7 +182,6 @@ pipeline {
                 input message: 'Por favor, aprove o build para continuar', ok: 'Continuar'
             }
         }
-
 
         stage('Deploy em Produção') {
             agent {
