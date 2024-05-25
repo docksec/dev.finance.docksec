@@ -73,6 +73,14 @@ pipeline {
                  """
             }
         }
+
+        stage('Deploy em Kubernetes') {
+            steps {
+                script {
+                    sh 'kubectl apply -f /home/docksec/docksec-deployment.yaml'
+                }
+            }
+        }
         
         stage('Upload to DefectDojo') {
             steps {
@@ -121,16 +129,7 @@ pipeline {
                     """
                 }
             }
-        }
-        
-        stage('Deploy em Kubernetes') {
-            steps {
-                script {
-                    sh 'kubectl apply -f docksec-deployment.yaml'
-                }
-            }
-        }
-        
+        }      
 
         stage('Deploy em Homologação') {
             agent {
