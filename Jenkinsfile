@@ -127,10 +127,10 @@ pipeline {
             steps {
                 script {
                     sh 'kubectl apply -f docksec-deployment.yaml'
-                    }
                 }
             }
         }
+        
 
         stage('Deploy em Homologação') {
             agent {
@@ -194,5 +194,4 @@ pipeline {
                 attachmentsPattern: 'trivyimage.txt'
         }
     }
-}
 }
