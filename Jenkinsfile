@@ -101,7 +101,7 @@ pipeline {
                     """
                     
                     httpRequest acceptType: 'APPLICATION_JSON',
-                                contentType: 'APPLICATION_XML',
+                                contentType: 'APPLICATION_JSON',
                                 httpMode: 'POST',
                                 requestBody: dpCheckPayload,
                                 responseHandle: 'STRING',
