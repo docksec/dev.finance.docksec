@@ -88,7 +88,7 @@ pipeline {
                         -H 'accept: application/json' \
                         -H 'Authorization: Token 6fc2aa245784571d63c26b4b16da08de5c639fe2' \
                         -H 'Content-Type: multipart/form-data' \
-                        -F 'product_name=Dev.finance' \
+                        -F 'product_name=Dev.Finance' \
                         -F 'engagement_name=POC' \
                         -F 'file=@${reportDPCheck.path};type=application/xml' \
                         -F 'scan_type=Dependency Check Scan' \
@@ -104,7 +104,7 @@ pipeline {
                         -H 'accept: application/json' \
                         -H 'Authorization: Token 6fc2aa245784571d63c26b4b16da08de5c639fe2' \
                         -H 'Content-Type: multipart/form-data' \
-                        -F 'product_name=Dev.finance' \
+                        -F 'product_name=Dev.Finance' \
                         -F 'engagement_name=POC' \
                         -F 'file=@${reportTrivyPath}/trivy_results.json;type=application/json' \
                         -F 'scan_type=Trivy Scan' \
