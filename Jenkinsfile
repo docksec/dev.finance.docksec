@@ -27,16 +27,72 @@ pipeline {
 
         stage('Upload to DefectDojo') {
             steps {
-                script {      
+                script {
+                        def defectDojoApiKey = credentials('DEFECTDOJO_API_KEY')
+                        def defectDojoUrl = 'https://192.168.0.4:8080/api/v2/import-scan/'
+                        def reportDP-Check = findFiles(glob: '**/dependency-check-report.xml')[0]
+                        def reportTrivy = findFiles(glob: '${trivy}/trivy_results.json')[0]
+                        def engagementId = '30'
+            
+                        def DP Check = """
+                        {
+                            "scan_type": "Dependency Check Scan",
+                            "engagement": ${engagementId},
+                            "file": null,
+                            "active": true,
+                            "verified": true,
+                            "scan_date": "${new Date().format('yyyy-MM-dd')}",
+                            "tags": "jenkins,dependency-check",
+                            "minimum_severity": "Low",
+                            "close_old_findings": true,
+                            "push_to_jira": false,
+                            "environment": "Development",
+                            "version": "1.0.0"
+                        }
+                        """
+            
+                        httpRequest acceptType: 'APPLICATION_JSON',
+                                    contentType: 'MULTIPART_FORM_DATA',
+                                    httpMode: 'POST',
+                                    requestBody: DP Check,
+                                    responseHandle: 'STRING',
+                                    url: defectDojoUrl,
+                                    customHeaders: [
+                                        [name: 'Authorization', value: "Token ${defectDojoApiKey}"]
+                                    ],
+                                    uploadFile: reportDP-Check.path,
+                                    multipartName: 'file'     
+
+                    def Trivy CLI = """
+                        {
+                            "scan_type": "Trivy Scan",
+                            "engagement": ${engagementId},
+                            "file": null,
+                            "active": true,
+                            "verified": true,
+                            "scan_date": "${new Date().format('yyyy-MM-dd')}",
+                            "tags": "jenkins,Trivy CLI",
+                            "minimum_severity": "Low",
+                            "close_old_findings": true,
+                            "push_to_jira": false,
+                            "environment": "Development",
+                            "version": "1.0.0"
+                        }
+                        """
+                    
+                            httpRequest acceptType: 'APPLICATION_JSON',
+                                        contentType: 'MULTIPART_FORM_DATA',
+                                        httpMode: 'POST',
+                                        requestBody: Trivy CLI,
+                                        responseHandle: 'STRING',
+                                        url: defectDojoUrl,
+                                        customHeaders: [
+                                            [name: 'Authorization', value: "Token ${defectDojoApiKey}"]
+                                        ],
+                                        uploadFile: reportTrivy.path,
+                                        multipartName: 'file'    
+                    
                     sh """
-                    curl -X POST http://192.168.0.2:8080/api/v2/reimport-scan/ \
-                        -H 'accept: application/json' \
-                        -H 'Authorization: Token 4996cd1d669be523369593998f24df017539de4e' \
-                        -H 'Content-Type: multipart/form-data' \
-                        -F 'test=1' \
-                        -F 'file=@/home/docksec/API/trivy_results.json;type=application/json' \
-                        -F 'scan_type=Trivy Scan' \
-                        -F 'tags=test'
                     ${nessus}/nessus_export.sh
                     """
                 }
@@ -73,9 +129,11 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                        sh 'docker build -t docksec:fixed2 .'
-                        sh 'docker tag docksec:fixed2 docksec6/docksec:fixed2'
-                        sh 'docker push docksec6/docksec:fixed2'
+                        sh """
+                        docker build -t docksec:fixed2 .
+                        docker tag docksec:fixed2 docksec6/docksec:fixed2
+                        docker push docksec6/docksec:fixed2
+                        """
                     }
                 }
             }
@@ -83,8 +141,10 @@ pipeline {
 
         stage('Trivy (Container Scan)') {
             steps {
-                sh 'trivy image docksec6/docksec:fixed2 > trivyimage.txt'
-                sh 'trivy image -f json docksec6/docksec:fixed2 > /home/docksec/API/trivy_results.json'
+                sh """
+                 trivy image docksec6/docksec:fixed2 > trivyimage.txt
+                 trivy image -f json docksec6/docksec:fixed2 > ${trivy}/trivy_results.json
+                 """
             }
         }
 
